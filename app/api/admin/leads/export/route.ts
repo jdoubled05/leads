@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       .join(",")
   );
 
-  const csv = [headers.join(","), ...rows].join("\n");
+  const csv = rows.join("\n");
 
   return new Response(csv, {
     headers: {
