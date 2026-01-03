@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HELOC Lead Pilot
 
-## Getting Started
+Email-first HELOC lead intake built with Next.js App Router, Tailwind, and Supabase.
 
-First, run the development server:
+## Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create a `.env.local` file with:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ADMIN_EXPORT_TOKEN=your-admin-token
+```
+
+3. Create the `leads` table in Supabase:
+
+```sql
+create table public.leads (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz default now(),
+  zip text not null,
+  primary_residence boolean not null,
+  property_type text not null,
+  est_home_value int not null,
+  mortgage_balance int not null,
+  est_equity int not null,
+  use_case text not null,
+  timeline text not null,
+  credit_band text not null,
+  first_name text,
+  email text not null,
+  lead_score int not null,
+  lead_tier text not null,
+  status text default 'new' not null,
+  batch_date date
+);
+```
+
+4. Enable RLS and allow anon inserts only:
+
+```sql
+alter table public.leads enable row level security;
+
+create policy "Allow anon insert"
+  on public.leads
+  for insert
+  to anon
+  with check (true);
+```
+
+## Run the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000/heloc`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Daily batch workflow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Export new leads (CSV):
 
-## Learn More
+```bash
+curl -H "x-admin-token: $ADMIN_EXPORT_TOKEN" \
+  http://localhost:3000/api/admin/leads/export
+```
 
-To learn more about Next.js, take a look at the following resources:
+Mark leads as sent:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+curl -X POST -H "x-admin-token: $ADMIN_EXPORT_TOKEN" \
+  http://localhost:3000/api/admin/leads/mark-sent
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Internal admin page
 
-## Deploy on Vercel
+Pilot-only access:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Visit `/admin/batch?token=YOUR_ADMIN_EXPORT_TOKEN`
+- Click download, upload into the Google Sheet (append only), then mark sent
+- Security note: token-based access for pilot use only
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Routes
+
+- `/heloc` lead intake form
+- `/privacy` placeholder privacy page
+- `/terms` placeholder terms page
