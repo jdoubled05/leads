@@ -32,9 +32,9 @@ type FormState = {
 const steps = [
   "Property basics",
   "Equity estimate",
-  "Use case",
-  "Timeline",
-  "Credit band",
+  "Planned use",
+  "Timing",
+  "Credit range",
   "Results",
 ];
 
@@ -88,11 +88,11 @@ export default function HelocLeadPage() {
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
       if (!/^\d{5}$/.test(form.zip)) {
-        setError("Enter a valid 5-digit ZIP code.");
+        setError("Please enter a 5-digit ZIP code.");
         return false;
       }
       if (form.primaryResidence === null) {
-        setError("Select whether this is your primary residence.");
+        setError("Please tell us if this is your primary residence.");
         return false;
       }
       return true;
@@ -100,7 +100,9 @@ export default function HelocLeadPage() {
 
     if (currentStep === 2) {
       if (form.mortgageBalance > form.estHomeValue) {
-        setError("Mortgage balance cannot exceed estimated home value.");
+        setError(
+          "Mortgage balance should be less than or equal to the home value."
+        );
         return false;
       }
       return true;
@@ -108,11 +110,11 @@ export default function HelocLeadPage() {
 
     if (currentStep === 6) {
       if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
-        setError("Enter a valid email address.");
+        setError("Please enter a valid email address.");
         return false;
       }
       if (!form.consentEmailOnly) {
-        setError("Consent is required to continue.");
+        setError("Please confirm email-only contact to continue.");
         return false;
       }
       return true;
@@ -134,7 +136,7 @@ export default function HelocLeadPage() {
     );
 
     if (!supabaseReady) {
-      setError("Supabase is not configured. Please try again later.");
+      setError("We are unable to save your details right now.");
       return;
     }
 
@@ -167,7 +169,7 @@ export default function HelocLeadPage() {
     setIsSubmitting(false);
 
     if (insertError) {
-      setError("Something went wrong. Please try again.");
+      setError("We could not save your details. Please try again.");
       return;
     }
 
@@ -182,11 +184,15 @@ export default function HelocLeadPage() {
           <header className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#5d5a54]">
-                HELOC Lead Intake
+                Home Equity Check
               </p>
               <h1 className="mt-3 text-3xl font-semibold md:text-4xl">
-                Quick equity snapshot
+                Estimate your potential HELOC range
               </h1>
+              <p className="mt-3 max-w-xl text-sm text-[#5d5a54]">
+                This is an informational tool only. It does not impact your
+                credit or offer a loan.
+              </p>
             </div>
             <div className="rounded-full border border-[#1c1b1a]/15 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em]">
               Step {step} of {steps.length}
@@ -216,11 +222,11 @@ export default function HelocLeadPage() {
               {submitted ? (
                 <div className="mt-10 space-y-4">
                   <h2 className="text-2xl font-semibold">
-                    Thanks, we&apos;ll be in touch.
+                    Thank you. We&apos;ve received your details.
                   </h2>
                   <p className="text-[#4a4742]">
-                    Your details are securely stored. You&apos;ll receive the
-                    next steps by email only.
+                    We&apos;ll email you additional information and next steps.
+                    No phone calls.
                   </p>
                   <Link
                     href="/"
@@ -234,24 +240,28 @@ export default function HelocLeadPage() {
                   {step === 1 && (
                     <div className="space-y-5">
                       <div>
-                        <label className="text-sm font-semibold">ZIP</label>
-                        <input
-                          value={form.zip}
-                          onChange={(event) =>
-                            setForm((prev) => ({
-                              ...prev,
-                              zip: event.target.value,
-                            }))
-                          }
-                          placeholder="12345"
-                          maxLength={5}
-                          className="mt-2 w-full rounded-2xl border border-[#1c1b1a]/20 bg-white px-4 py-3 text-base outline-none transition focus:border-[#1c1b1a]"
-                        />
-                      </div>
+                          <label className="text-sm font-semibold">ZIP code</label>
+                          <input
+                            value={form.zip}
+                            onChange={(event) =>
+                              setForm((prev) => ({
+                                ...prev,
+                                zip: event.target.value,
+                              }))
+                            }
+                            placeholder="12345"
+                            maxLength={5}
+                            className="mt-2 w-full rounded-2xl border border-[#1c1b1a]/20 bg-white px-4 py-3 text-base outline-none transition focus:border-[#1c1b1a]"
+                          />
+                          <p className="mt-2 text-xs text-[#5d5a54]">
+                            Used to estimate home values in your area. No impact
+                            to credit.
+                          </p>
+                        </div>
 
                       <div className="space-y-2">
                         <p className="text-sm font-semibold">
-                          Primary residence?
+                          Is this your primary residence?
                         </p>
                         <div className="flex gap-3">
                           {[
@@ -374,14 +384,22 @@ export default function HelocLeadPage() {
                           {formatCurrency(estEquity)}
                         </span>
                       </div>
+                      <p className="text-xs text-[#5d5a54]">
+                        Equity is calculated as home value minus mortgage
+                        balance. This is informational only.
+                      </p>
                     </div>
                   )}
 
                   {step === 3 && (
                     <div className="space-y-3">
+                      <p className="text-xs text-[#5d5a54]">
+                        Helps us tailor informational guidance for common HELOC
+                        use cases.
+                      </p>
                       {[
                         {
-                          label: "Home improvement",
+                          label: "Home improvements or repairs",
                           value: "home_improvement",
                         },
                         {
@@ -414,7 +432,11 @@ export default function HelocLeadPage() {
                   )}
 
                   {step === 4 && (
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <p className="text-xs text-[#5d5a54]">
+                        Timing provides context for educational resources.
+                      </p>
+                      <div className="grid gap-3 md:grid-cols-2">
                       {[
                         { label: "0-30 days", value: "0-30" },
                         { label: "1-3 months", value: "1-3" },
@@ -439,11 +461,16 @@ export default function HelocLeadPage() {
                           {option.label}
                         </button>
                       ))}
+                      </div>
                     </div>
                   )}
 
                   {step === 5 && (
-                    <div className="grid gap-3 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <p className="text-xs text-[#5d5a54]">
+                        Credit range helps estimate general HELOC availability.
+                      </p>
+                      <div className="grid gap-3 md:grid-cols-2">
                       {[
                         { label: "740+", value: "740+" },
                         { label: "700-739", value: "700-739" },
@@ -469,6 +496,7 @@ export default function HelocLeadPage() {
                           {option.label}
                         </button>
                       ))}
+                      </div>
                     </div>
                   )}
 
@@ -483,14 +511,20 @@ export default function HelocLeadPage() {
                           {formatCurrency(availableHigh)}
                         </p>
                         <p className="mt-2 text-xs text-[#5d5a54]">
-                          Estimates are informational only and not a guarantee.
+                          This is a general estimate only and not a guarantee of
+                          available credit.
                         </p>
                       </div>
+
+                      <p className="text-sm text-[#4a4742]">
+                        If you&apos;d like a summary and next steps by email,
+                        share your details below.
+                      </p>
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <label className="text-sm font-semibold">
-                            First name
+                            First name (optional)
                           </label>
                           <input
                             value={form.firstName}
@@ -505,7 +539,9 @@ export default function HelocLeadPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-semibold">Email</label>
+                          <label className="text-sm font-semibold">
+                            Email
+                          </label>
                           <input
                             value={form.email}
                             onChange={(event) =>
@@ -517,6 +553,9 @@ export default function HelocLeadPage() {
                             placeholder="you@email.com"
                             className="mt-2 w-full rounded-2xl border border-[#1c1b1a]/20 bg-white px-4 py-3 text-base outline-none transition focus:border-[#1c1b1a]"
                           />
+                          <p className="mt-2 text-xs text-[#5d5a54]">
+                            We will only email your results and options.
+                          </p>
                         </div>
                       </div>
 
@@ -533,8 +572,8 @@ export default function HelocLeadPage() {
                           className="mt-1 h-4 w-4 accent-[#1c1b1a]"
                         />
                         <span>
-                          I consent to be contacted by email only about my HELOC
-                          inquiry.
+                          I consent to receive email-only information related to
+                          my home equity estimate.
                         </span>
                       </label>
 
@@ -586,7 +625,7 @@ export default function HelocLeadPage() {
                         disabled={isSubmitting}
                         className="rounded-full bg-[#1c1b1a] px-6 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#f8f4ee] transition hover:bg-[#2e2a24] disabled:cursor-not-allowed disabled:bg-[#514c44]"
                       >
-                        {isSubmitting ? "Submitting..." : "Submit lead"}
+                        {isSubmitting ? "Submitting..." : "Send my info"}
                       </button>
                     )}
                   </div>
@@ -596,7 +635,7 @@ export default function HelocLeadPage() {
 
             <aside className="space-y-6">
               <div className="rounded-[28px] border border-[#1c1b1a]/10 bg-white/70 p-6 shadow-[0_18px_50px_-40px_rgba(28,27,26,0.6)]">
-                <h2 className="text-lg font-semibold">Lead preview</h2>
+                <h2 className="text-lg font-semibold">Summary</h2>
                 <div className="mt-4 space-y-3 text-sm text-[#4a4742]">
                   <p>
                     ZIP: <span className="font-semibold">{form.zip || "—"}</span>
@@ -620,14 +659,14 @@ export default function HelocLeadPage() {
               </div>
               <div className="rounded-[28px] border border-[#1c1b1a]/10 bg-[#1c1b1a] p-6 text-sm text-[#f8f4ee]">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7d0c5]">
-                  Why it matters
+                  How this works
                 </p>
                 <p className="mt-3 text-base font-semibold">
-                  High-intent leads surface fast.
+                  This tool provides an informational estimate.
                 </p>
                 <p className="mt-3 text-[#d7d0c5]">
-                  Your daily batch prioritizes homeowners with solid equity,
-                  strong credit, and near-term timing.
+                  We use your inputs to calculate a general equity range. It
+                  does not impact credit and is not a loan offer.
                 </p>
               </div>
             </aside>
