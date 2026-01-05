@@ -1,10 +1,15 @@
 import Link from "next/link";
+import PublicHeader from "@/components/PublicHeader";
 
 export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f8f4ee] text-[#1c1b1a]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(235,207,166,0.7),_transparent_55%),radial-gradient(circle_at_80%_20%,_rgba(197,214,241,0.65),_transparent_45%)]" />
-      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-start justify-center px-6 py-20 md:px-12">
+      <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col items-start px-6 py-12 md:px-12">
+        <div className="w-full">
+          <PublicHeader />
+        </div>
+        <div className="flex flex-1 flex-col items-start justify-center py-10">
         <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#1c1b1a]/20 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em]">
           Home Equity Check
         </span>
@@ -28,6 +33,7 @@ export default function Home() {
           >
             Privacy
           </Link>
+        </div>
         </div>
       </div>
     </div>

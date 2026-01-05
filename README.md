@@ -17,6 +17,7 @@ NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMIN_EXPORT_TOKEN=your-admin-token
+NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL=your-conversion-label
 ```
 
 3. Create the `leads` table in Supabase:
@@ -86,6 +87,11 @@ Pilot-only access:
 - Visit `/admin/batch?token=YOUR_ADMIN_EXPORT_TOKEN`
 - Click download, upload into the Google Sheet (append only), then mark sent
 - Security note: token-based access for pilot use only
+
+## Google Ads conversion
+
+- Set `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL` in your hosting environment
+- Conversion fires only after a successful lead save
 
 ## Routes
 

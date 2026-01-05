@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import PublicHeader from "@/components/PublicHeader";
 import { scoreLead } from "@/lib/leadScoring";
 import { supabaseClient } from "@/lib/supabaseClient";
+import { trackAdsConversion } from "@/lib/gtag";
 
 type PropertyType = "single_family" | "condo_townhome" | "2_4_unit";
 type UseCase =
@@ -50,6 +52,7 @@ export default function HelocLeadPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const hasTrackedConversion = useRef(false);
   const [form, setForm] = useState<FormState>({
     zip: "",
     primaryResidence: null,
@@ -174,14 +177,22 @@ export default function HelocLeadPage() {
     }
 
     setSubmitted(true);
+
+    const conversionLabel =
+      process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL;
+    if (!hasTrackedConversion.current && conversionLabel) {
+      trackAdsConversion(`AW-17850908521/${conversionLabel}`);
+      hasTrackedConversion.current = true;
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#f8f4ee] text-[#1c1b1a]">
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,_rgba(249,208,165,0.8),_transparent_55%),radial-gradient(circle_at_80%_0%,_rgba(191,221,214,0.8),_transparent_50%),radial-gradient(circle_at_30%_70%,_rgba(198,210,248,0.7),_transparent_55%)]" />
-        <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-16 md:px-12">
-          <header className="flex flex-wrap items-center justify-between gap-4">
+        <div className="relative mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-10 md:px-12">
+          <PublicHeader />
+          <header className="mt-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#5d5a54]">
                 Home Equity Check
