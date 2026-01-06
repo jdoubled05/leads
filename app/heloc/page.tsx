@@ -102,7 +102,31 @@ export default function HelocLeadPage() {
     }
 
     if (currentStep === 2) {
-      if (form.mortgageBalance > form.estHomeValue) {
+      const estHomeValue = Number(form.estHomeValue);
+      const mortgageBalance = Number(form.mortgageBalance);
+
+      if (Number.isNaN(estHomeValue) || Number.isNaN(mortgageBalance)) {
+        setError(
+          "Please enter valid numbers for home value and mortgage balance."
+        );
+        return false;
+      }
+
+      if (estHomeValue < 50000 || estHomeValue > 10000000) {
+        setError(
+          "That home value looks unusual. Please double-check the amount (example: 450000)."
+        );
+        return false;
+      }
+
+      if (mortgageBalance < 0 || mortgageBalance > 10000000) {
+        setError(
+          "That mortgage balance looks unusual. Please double-check the amount."
+        );
+        return false;
+      }
+
+      if (mortgageBalance > estHomeValue) {
         setError(
           "Mortgage balance should be less than or equal to the home value."
         );
