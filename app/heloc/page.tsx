@@ -143,8 +143,18 @@ export default function HelocLeadPage() {
       return;
     }
 
+    const estHomeValue = Number(form.estHomeValue);
+    const mortgageBalance = Number(form.mortgageBalance);
+
+    if (Number.isNaN(estHomeValue) || Number.isNaN(mortgageBalance)) {
+      setError("Please provide valid numeric values for the estimate.");
+      return;
+    }
+
+    const calculatedEquity = Math.max(0, estHomeValue - mortgageBalance);
+
     const { score, tier } = scoreLead({
-      estEquity,
+      estEquity: calculatedEquity,
       timeline: form.timeline,
       creditBand: form.creditBand,
       primaryResidence: Boolean(form.primaryResidence),
@@ -153,13 +163,13 @@ export default function HelocLeadPage() {
 
     setIsSubmitting(true);
 
-    const { error: insertError } = await supabaseClient.from("leads").insert({
+    const insertPayload = {
       zip: form.zip,
       primary_residence: Boolean(form.primaryResidence),
       property_type: form.propertyType,
-      est_home_value: form.estHomeValue,
-      mortgage_balance: form.mortgageBalance,
-      est_equity: estEquity,
+      est_home_value: estHomeValue,
+      mortgage_balance: mortgageBalance,
+      est_equity: calculatedEquity,
       use_case: form.useCase,
       timeline: form.timeline,
       credit_band: form.creditBand,
@@ -167,7 +177,11 @@ export default function HelocLeadPage() {
       email: form.email,
       lead_score: score,
       lead_tier: tier,
-    });
+    };
+
+    const { error: insertError } = await supabaseClient
+      .from("leads")
+      .insert(insertPayload);
 
     setIsSubmitting(false);
 
